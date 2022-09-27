@@ -1,0 +1,28 @@
+{
+  "name": "findrecipe",
+  "version": "1.0.0",
+  "description": "find your recipe",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carloszaep/FindRecipe.git"
+  },
+  "author": "Carlos Paez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/carloszaep/FindRecipe/issues"
+  },
+  "homepage": "https://github.com/carloszaep/FindRecipe#readme",
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.7.0",
+    "parcel": "^2.7.0"
+  },
+  "dependencies": {
+    "core-js": "^3.25.3",
+    "fractional": "^1.0.0",
+    "regenerator-runtime": "^0.13.9"
+  }
+}
