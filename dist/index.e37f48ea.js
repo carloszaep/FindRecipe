@@ -2401,12 +2401,23 @@ const addBookmark = function(recipe) {
     state.bookmarks.push(recipe);
     // mark current recipe as bookmark
     if (recipe.id === state.recipe.id) state.recipe.bookmarked = true;
+    // save data in localStorage
+    persistBookmarks();
 };
 const removeBookmark = function(id) {
+    // remove bookmark
     const index = state.bookmarks.findIndex((el)=>el.id = id);
     state.bookmarks.splice(index, 1);
+    // mark current recipe as NOT bookmark
     if (id === state.recipe.id) state.recipe.bookmarked = false;
+    // save data in localStorage
+    persistBookmarks();
 };
+const init = function() {
+    const storage = localStorage.getItem("bookmarks");
+    if (storage) state.bookmarks = JSON.parse(storage);
+};
+init();
 
 },{"regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./config.js":"k5Hzs","./helpers.js":"hGI1E"}],"k5Hzs":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
