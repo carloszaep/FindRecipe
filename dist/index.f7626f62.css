@@ -387,7 +387,7 @@ body {
   background-color: #f2efee;
 }
 
-.bookmarks:hover, .nav__btn--bookmarks:hover + .bookmarks {
+.bookmarks:hover, .nav__btn--bookmarks:hover + .bookmarks, .bookmarks:hover, .nav__btn--cart:hover + .bookmarks {
   visibility: visible;
   opacity: 1;
 }
@@ -541,7 +541,6 @@ body {
   height: 100%;
   width: 100%;
   opacity: .6;
-  background-image: linear-gradient(to bottom right, #fbdb89, #f48982);
   display: block;
   position: absolute;
   top: 0;

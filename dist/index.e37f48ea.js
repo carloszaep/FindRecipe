@@ -600,16 +600,17 @@ const controlAddOrDelBookmark = function() {
 };
 const controlAddRecipe = async function(newRecipe) {
     try {
-        // show spinning
-        (0, _addRecipeViewJsDefault.default).renderSpinner();
         await _moduleJs.uploadRecipe(newRecipe);
         // render recipe
         (0, _recipeViewJsDefault.default).render(_moduleJs.state.recipe);
         // close form
         (0, _addRecipeViewJsDefault.default).toggleWindow();
+        // render bookmark view
+        (0, _bookmarksViewJsDefault.default).render(_moduleJs.state.bookmarks);
+        // change id in url
+        window.history.pushState(null, "", `#${_moduleJs.state.recipe.id}`);
     } catch (err) {
         console.error(err);
-        (0, _addRecipeViewJsDefault.default).renderMessage(err);
     }
 };
 const init = function() {
@@ -2381,7 +2382,7 @@ const createRecipeObject = function(data) {
 };
 const loadRecipe = async function(id) {
     try {
-        const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}/${id}`);
+        const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}/${id}?key=${(0, _configJs.KEY)}`);
         state.recipe = createRecipeObject(data);
         if (state.bookmarks.some((b)=>b.id === id)) state.recipe.bookmarked = true;
         else state.recipe.bookmarked = false;
@@ -2392,13 +2393,16 @@ const loadRecipe = async function(id) {
 const loadSearchResults = async function(query) {
     try {
         state.search.query = query;
-        const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}?search=${query}`);
+        const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}?search=${query}&key=${(0, _configJs.KEY)}`);
         state.search.result = data.data.recipes.map((rec)=>{
             return {
                 id: rec.id,
                 title: rec.title,
                 publisher: rec.publisher,
-                image: rec.image_url
+                image: rec.image_url,
+                ...rec.key && {
+                    key: rec.key
+                }
             };
         });
     } catch (err) {
@@ -2444,7 +2448,6 @@ const init = function() {
 init();
 const uploadRecipe = async function(newRecipe) {
     try {
-        console.log(newRecipe);
         const ingredients = Object.entries(newRecipe).filter((entre)=>entre[0].startsWith("ingredient") && entre[1]).map((ing)=>{
             const ingArr = ing[1].replaceAll(" ", "").split(",");
             if (ingArr.length !== 3) throw new Error("wrong ingredient format");
@@ -2566,12 +2569,11 @@ class RecipeView extends (0, _viewJsDefault.default) {
         });
     }
     _generateMarkup() {
-        console.log(this._data);
         return `
     <figure class="recipe__fig">
       <img src=${this._data.image} alt=${this._data.title} class="recipe__img" />
-      <h1 class=${this._data.title}>
-        <span>Pasta with tomato cream sauce</span>
+      <h1 class="recipe__title">
+        <span>${this._data.title}</span>
       </h1>
     </figure>
 
@@ -2604,8 +2606,10 @@ class RecipeView extends (0, _viewJsDefault.default) {
       </div>
     </div>
 
-    <div class="recipe__user-generated">
-      
+    <div class="recipe__user-generated ${this._data.key ? "" : "hidden"}">
+      <svg>
+        <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
+      </svg>
     </div>
     <button class="btn--round btn--bookmark">
       <svg class="">
@@ -2954,7 +2958,12 @@ var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class View {
     _data;
-    render(data) {
+    /**
+   * Render the received object to the DOM
+   * @param {Object | Object[]} data the data to be render (e.g recipe)
+   * @returns {undefined}
+   * @this {Object} view instance
+   */ render(data) {
         if (!data || Array.isArray(data) && data.length === 0) return this.renderMessage();
         this._data = data;
         const markup = this._generateMarkup();
@@ -3050,7 +3059,12 @@ class resultView extends (0, _viewJsDefault.default) {
             <h4 class="preview__title">${result.title}</h4>
             <p class="preview__publisher">${result.publisher}</p>
             
+            <div class="recipe__user-generated ${result.key ? "" : "hidden"}">
+            <svg>
+            <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
+            </svg>
             </div>
+          </div>
         </a>
     </li>
     `;
@@ -3075,12 +3089,13 @@ class paginationView extends (0, _viewJsDefault.default) {
             handler(goToPage);
         });
     }
-    _buttonMarkup(direction, page) {
+    _buttonMarkup(direction, page, totalPages) {
         const right = direction === "right";
+        const numberOfPage = page;
         const pagNumber = right ? page + 1 : page - 1;
         const button = `
     <button data-goto="${pagNumber}" class="btn--inline pagination__btn--${right ? "next" : "prev"}">
-        <span>Page ${pagNumber}</span>
+        <span>Go to page ${pagNumber} of ${totalPages}</span>
         <svg class="search__icon">
         <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-${direction}"></use>
         </svg>
@@ -3091,11 +3106,11 @@ class paginationView extends (0, _viewJsDefault.default) {
         const numPages = Math.ceil(this._data.result.length / this._data.resultPerPage);
         const curPage = this._data.page;
         // page1, and there are other
-        if (curPage === 1 && numPages > 1) return `${this._buttonMarkup("right", curPage)}`;
+        if (curPage === 1 && numPages > 1) return `${this._buttonMarkup("right", curPage, numPages)}`;
         // last page
-        if (curPage === numPages && numPages > 1) return `${this._buttonMarkup("left", curPage)}`;
+        if (curPage === numPages && numPages > 1) return `${this._buttonMarkup("left", curPage, numPages)}`;
         // other page
-        if (curPage < numPages) return `${this._buttonMarkup("right", curPage)}${this._buttonMarkup("left", curPage)}`;
+        if (curPage < numPages) return `${this._buttonMarkup("right", curPage, numPages)}${this._buttonMarkup("left", curPage, numPages)}`;
         // page1, no other
         return "";
     }
@@ -3126,7 +3141,11 @@ class bookmarkView extends (0, _viewJsDefault.default) {
             <div class="preview__data">
             <h4 class="preview__title">${result.title}</h4>
             <p class="preview__publisher">${result.publisher}</p>
-            
+            <div class="recipe__user-generated ${result.key ? "" : "hidden"}">
+            <svg>
+            <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
+            </svg>
+            </div>
             </div>
         </a>
     </li>

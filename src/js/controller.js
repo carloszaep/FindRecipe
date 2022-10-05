@@ -75,18 +75,20 @@ const controlAddOrDelBookmark = function () {
 
 const controlAddRecipe = async function (newRecipe) {
   try {
-    // show spinning
-    addRecipeView.renderSpinner();
-
     await model.uploadRecipe(newRecipe);
     // render recipe
     recipeView.render(model.state.recipe);
 
     // close form
     addRecipeView.toggleWindow();
+
+    // render bookmark view
+    bookmarksView.render(model.state.bookmarks);
+
+    // change id in url
+    window.history.pushState(null, '', `#${model.state.recipe.id}`);
   } catch (err) {
     console.error(err);
-    addRecipeView.renderMessage(err);
   }
 };
 

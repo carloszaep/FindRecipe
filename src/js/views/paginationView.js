@@ -14,15 +14,16 @@ class paginationView extends View {
     });
   }
 
-  _buttonMarkup(direction, page) {
+  _buttonMarkup(direction, page, totalPages) {
     const right = direction === 'right';
+    const numberOfPage = page;
     const pagNumber = right ? page + 1 : page - 1;
 
     const button = `
     <button data-goto="${pagNumber}" class="btn--inline pagination__btn--${
       right ? 'next' : 'prev'
     }">
-        <span>Page ${pagNumber}</span>
+        <span>Go to page ${pagNumber} of ${totalPages}</span>
         <svg class="search__icon">
         <use href="${icons}#icon-arrow-${direction}"></use>
         </svg>
@@ -37,18 +38,19 @@ class paginationView extends View {
 
     // page1, and there are other
     if (curPage === 1 && numPages > 1)
-      return `${this._buttonMarkup('right', curPage)}`;
+      return `${this._buttonMarkup('right', curPage, numPages)}`;
 
     // last page
     if (curPage === numPages && numPages > 1)
-      return `${this._buttonMarkup('left', curPage)}`;
+      return `${this._buttonMarkup('left', curPage, numPages)}`;
 
     // other page
     if (curPage < numPages)
-      return `${this._buttonMarkup('right', curPage)}${this._buttonMarkup(
-        'left',
-        curPage
-      )}`;
+      return `${this._buttonMarkup(
+        'right',
+        curPage,
+        numPages
+      )}${this._buttonMarkup('left', curPage, numPages)}`;
     // page1, no other
     return '';
   }

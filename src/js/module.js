@@ -25,7 +25,7 @@ const createRecipeObject = function (data) {
 
 export const loadRecipe = async function (id) {
   try {
-    const data = await getJSON(`${API_URL}/${id}`);
+    const data = await getJSON(`${API_URL}/${id}?key=${KEY}`);
     state.recipe = createRecipeObject(data);
 
     if (state.bookmarks.some(b => b.id === id)) {
@@ -39,7 +39,7 @@ export const loadRecipe = async function (id) {
 export const loadSearchResults = async function (query) {
   try {
     state.search.query = query;
-    const data = await getJSON(`${API_URL}?search=${query}`);
+    const data = await getJSON(`${API_URL}?search=${query}&key=${KEY}`);
 
     state.search.result = data.data.recipes.map(rec => {
       return {
@@ -47,6 +47,7 @@ export const loadSearchResults = async function (query) {
         title: rec.title,
         publisher: rec.publisher,
         image: rec.image_url,
+        ...(rec.key && { key: rec.key }),
       };
     });
   } catch (err) {
@@ -107,8 +108,6 @@ init();
 
 export const uploadRecipe = async function (newRecipe) {
   try {
-    console.log(newRecipe);
-
     const ingredients = Object.entries(newRecipe)
       .filter(entre => entre[0].startsWith('ingredient') && entre[1])
       .map(ing => {
