@@ -20,6 +20,24 @@ class RecipeView extends View {
     });
   }
 
+  addHandlerAddToCart(handler) {
+    this._parentElement.addEventListener('click', function (e) {
+      const ingredient = e.target.closest('.recipe__ingredient');
+      if (!ingredient) return;
+      console.log(ingredient);
+
+      const unit = ingredient.querySelector('.recipe__unit').textContent;
+      console.log(unit);
+      const ingQuantity =
+        ingredient.querySelector('.recipe__quantity').textContent;
+      const ingDescription = ingredient
+        .querySelector('.recipe__description')
+        .textContent.trim();
+
+      handler({ ingQuantity, ingDescription, unit });
+    });
+  }
+
   addHandlerAddBookmark(handler) {
     this._parentElement.addEventListener('click', function (e) {
       const btnBM = e.target.closest('.btn--bookmark');

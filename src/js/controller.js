@@ -5,6 +5,7 @@ import resultsView from './views/resultsView.js';
 import paginationView from './views/paginationView.js';
 import bookmarksView from './views/bookmarksView.js';
 import addRecipeView from './views/addRecipeView.js';
+import addToCart from './views/addToCart.js';
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import { async } from 'regenerator-runtime';
@@ -92,9 +93,15 @@ const controlAddRecipe = async function (newRecipe) {
   }
 };
 
+const controlAddToCart = function (ingredient) {
+  model.addToCart(ingredient);
+  addToCart.render(ingredient);
+};
+
 const init = function () {
   recipeView.addHandlerRender(controlRecipe);
   recipeView.addHandlerUpdateServing(controlServing);
+  recipeView.addHandlerAddToCart(controlAddToCart);
   recipeView.addHandlerAddBookmark(controlAddOrDelBookmark);
   searchView.addHandlerSearch(controlSearchResult);
   paginationView.addHandlerLClick(controlPagination);

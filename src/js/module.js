@@ -6,6 +6,7 @@ export const state = {
   recipe: {},
   search: { query: '', result: [], resultPerPage: RES_PER_PAGE, page: 1 },
   bookmarks: [],
+  cart: [],
 };
 
 const createRecipeObject = function (data) {
@@ -21,6 +22,28 @@ const createRecipeObject = function (data) {
     ingredients: recipe.ingredients,
     ...(recipe.key && { key: recipe.key }),
   };
+};
+
+const persistCart = function () {
+  localStorage.setItem('cart', JSON.stringify(state.cart));
+};
+export const addToCart = function (ingredient) {
+  const condition = state.cart.some(
+    ing => ing.ingDescription === ingredient.ingDescription
+  );
+  if (condition) return;
+
+  state.cart.push(ingredient);
+
+  persistCart();
+};
+
+export const removeToCart = function () {
+  // remove bookmark
+
+  state.cart = [];
+
+  persistCart();
 };
 
 export const loadRecipe = async function (id) {
@@ -100,8 +123,10 @@ export const removeBookmark = function (id) {
 };
 
 const init = function () {
-  const storage = localStorage.getItem('bookmarks');
-  if (storage) state.bookmarks = JSON.parse(storage);
+  const bookmark = localStorage.getItem('bookmarks');
+  const cart = localStorage.getItem('cart');
+  if (bookmark) state.bookmarks = JSON.parse(bookmark);
+  if (cart) state.cart = JSON.parse(cart);
 };
 
 init();
