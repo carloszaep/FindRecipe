@@ -112,14 +112,14 @@ class RecipeView extends View {
     <ul class="recipe__ingredient-list">
     ${this._data.ingredients
       .map(ing => {
+        const fraction =
+          ing.quantity % 1 === 0 ? ing.quantity : n2f(ing.quantity);
         return `
           <li class="recipe__ingredient">
           <svg class="recipe__icon">
             <use href="${icons}#icon-check"></use>
           </svg>
-          <div class="recipe__quantity">${
-            ing.quantity ? n2f(ing.quantity) : ''
-          }</div>
+          <div class="recipe__quantity">${ing.quantity ? fraction : ''}</div>
           <div class="recipe__description">
             <span class="recipe__unit">${ing.unit}</span>
             ${ing.description}
