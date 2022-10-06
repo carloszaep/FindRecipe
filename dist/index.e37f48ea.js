@@ -567,6 +567,7 @@ const controlRecipe = async function() {
         // RENDER RECIPE
         (0, _recipeViewJsDefault.default).render(_moduleJs.state.recipe);
         (0, _bookmarksViewJsDefault.default).render(_moduleJs.state.bookmarks);
+        (0, _addToCartJsDefault.default).render(_moduleJs.state.cart);
     } catch (err) {
         (0, _recipeViewJsDefault.default).renderError(err.message);
         console.error(err.message);
@@ -609,6 +610,7 @@ const controlAddRecipe = async function(newRecipe) {
         (0, _addRecipeViewJsDefault.default).toggleWindow();
         // render bookmark view
         (0, _bookmarksViewJsDefault.default).render(_moduleJs.state.bookmarks);
+        (0, _addToCartJsDefault.default).render(_moduleJs.state.cart);
         // change id in url
         window.history.pushState(null, "", `#${_moduleJs.state.recipe.id}`);
     } catch (err) {
@@ -617,7 +619,13 @@ const controlAddRecipe = async function(newRecipe) {
 };
 const controlAddToCart = function(ingredient) {
     _moduleJs.addToCart(ingredient);
-    (0, _addToCartJsDefault.default).render(ingredient);
+    (0, _addToCartJsDefault.default).render(_moduleJs.state.cart);
+};
+const controlRemoveFromCart = function(id) {
+    // remove from model
+    _moduleJs.removeToCart(id);
+    // render display
+    (0, _addToCartJsDefault.default).render(_moduleJs.state.cart);
 };
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
@@ -627,6 +635,7 @@ const init = function() {
     (0, _searchViewJsDefault.default).addHandlerSearch(controlSearchResult);
     (0, _paginationViewJsDefault.default).addHandlerLClick(controlPagination);
     (0, _addRecipeViewJsDefault.default).addHandlerUpload(controlAddRecipe);
+    (0, _addToCartJsDefault.default).addHandlerRemove(controlRemoveFromCart);
 };
 init();
 
@@ -2399,9 +2408,10 @@ const addToCart = function(ingredient) {
     state.cart.push(ingredient);
     persistCart();
 };
-const removeToCart = function() {
-    // remove bookmark
-    state.cart = [];
+const removeToCart = function(id) {
+    // remove from cart
+    const index = state.cart.findIndex((el)=>el.id === id);
+    state.cart.splice(index, 1);
     persistCart();
 };
 const loadRecipe = async function(id) {
@@ -2458,7 +2468,7 @@ const addBookmark = function(recipe) {
 };
 const removeBookmark = function(id) {
     // remove bookmark
-    const index = state.bookmarks.findIndex((el)=>el.id = id);
+    const index = state.bookmarks.findIndex((el)=>el.id === id);
     state.bookmarks.splice(index, 1);
     // mark current recipe as NOT bookmark
     if (id === state.recipe.id) state.recipe.bookmarked = false;
@@ -2569,6 +2579,8 @@ var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
 var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 var _fractional = require("fractional");
+var _uniqid = require("uniqid");
+var _uniqidDefault = parcelHelpers.interopDefault(_uniqid);
 class RecipeView extends (0, _viewJsDefault.default) {
     _parentElement = document.querySelector(".recipe");
     _message = "";
@@ -2591,15 +2603,13 @@ class RecipeView extends (0, _viewJsDefault.default) {
         this._parentElement.addEventListener("click", function(e) {
             const ingredient = e.target.closest(".recipe__ingredient");
             if (!ingredient) return;
-            console.log(ingredient);
-            const unit = ingredient.querySelector(".recipe__unit").textContent;
-            console.log(unit);
+            const id = (0, _uniqidDefault.default)();
             const ingQuantity = ingredient.querySelector(".recipe__quantity").textContent;
             const ingDescription = ingredient.querySelector(".recipe__description").textContent.trim();
             handler({
                 ingQuantity,
                 ingDescription,
-                unit
+                id
             });
         });
     }
@@ -2703,7 +2713,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
 }
 exports.default = new RecipeView();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../../img/icons.svg":"loVOp","fractional":"3SU56","./view.js":"bWlJ9"}],"loVOp":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../../img/icons.svg":"loVOp","fractional":"3SU56","./view.js":"bWlJ9","uniqid":"iN0co"}],"loVOp":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("hWUTQ") + "icons.dfd7a6db.svg" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
@@ -3054,7 +3064,247 @@ class View {
 }
 exports.default = View;
 
-},{"url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9OQAM":[function(require,module,exports) {
+},{"url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iN0co":[function(require,module,exports) {
+var process = require("process");
+/* 
+(The MIT License)
+Copyright (c) 2014-2021 Halász Ádám <adam@aimform.com>
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/ //  Unique Hexatridecimal ID Generator
+// ================================================
+//  Dependencies
+// ================================================
+var pid = typeof process !== "undefined" && process.pid ? process.pid.toString(36) : "";
+var address = "";
+if (typeof __webpack_require__ !== "function" && true) {
+    var mac = "", os = require("os");
+    if (os.networkInterfaces) var networkInterfaces = os.networkInterfaces();
+    if (networkInterfaces) {
+        loop: for(let interface_key in networkInterfaces){
+            const networkInterface = networkInterfaces[interface_key];
+            const length = networkInterface.length;
+            for(var i = 0; i < length; i++)if (networkInterface[i] !== undefined && networkInterface[i].mac && networkInterface[i].mac != "00:00:00:00:00:00") {
+                mac = networkInterface[i].mac;
+                break loop;
+            }
+        }
+        address = mac ? parseInt(mac.replace(/\:|\D+/gi, "")).toString(36) : "";
+    }
+}
+//  Exports
+// ================================================
+module.exports = module.exports.default = function(prefix, suffix) {
+    return (prefix ? prefix : "") + address + pid + now().toString(36) + (suffix ? suffix : "");
+};
+module.exports.process = function(prefix, suffix) {
+    return (prefix ? prefix : "") + pid + now().toString(36) + (suffix ? suffix : "");
+};
+module.exports.time = function(prefix, suffix) {
+    return (prefix ? prefix : "") + now().toString(36) + (suffix ? suffix : "");
+};
+//  Helpers
+// ================================================
+function now() {
+    var time = Date.now();
+    var last = now.last || time;
+    return now.last = time > last ? time : last + 1;
+}
+
+},{"process":"d5jf4","os":"6yyXu"}],"d5jf4":[function(require,module,exports) {
+// shim for using process in browser
+var process = module.exports = {};
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+var cachedSetTimeout;
+var cachedClearTimeout;
+function defaultSetTimout() {
+    throw new Error("setTimeout has not been defined");
+}
+function defaultClearTimeout() {
+    throw new Error("clearTimeout has not been defined");
+}
+(function() {
+    try {
+        if (typeof setTimeout === "function") cachedSetTimeout = setTimeout;
+        else cachedSetTimeout = defaultSetTimout;
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === "function") cachedClearTimeout = clearTimeout;
+        else cachedClearTimeout = defaultClearTimeout;
+    } catch (e1) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+})();
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) //normal enviroments in sane situations
+    return setTimeout(fun, 0);
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch (e1) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) //normal enviroments in sane situations
+    return clearTimeout(marker);
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e1) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) return;
+    draining = false;
+    if (currentQueue.length) queue = currentQueue.concat(queue);
+    else queueIndex = -1;
+    if (queue.length) drainQueue();
+}
+function drainQueue() {
+    if (draining) return;
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+    var len = queue.length;
+    while(len){
+        currentQueue = queue;
+        queue = [];
+        while(++queueIndex < len)if (currentQueue) currentQueue[queueIndex].run();
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+process.nextTick = function(fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) for(var i = 1; i < arguments.length; i++)args[i - 1] = arguments[i];
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) runTimeout(drainQueue);
+};
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function() {
+    this.fun.apply(null, this.array);
+};
+process.title = "browser";
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ""; // empty string to avoid regexp issues
+process.versions = {};
+function noop() {}
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+process.listeners = function(name) {
+    return [];
+};
+process.binding = function(name) {
+    throw new Error("process.binding is not supported");
+};
+process.cwd = function() {
+    return "/";
+};
+process.chdir = function(dir) {
+    throw new Error("process.chdir is not supported");
+};
+process.umask = function() {
+    return 0;
+};
+
+},{}],"6yyXu":[function(require,module,exports) {
+exports.endianness = function() {
+    return "LE";
+};
+exports.hostname = function() {
+    if (typeof location !== "undefined") return location.hostname;
+    else return "";
+};
+exports.loadavg = function() {
+    return [];
+};
+exports.uptime = function() {
+    return 0;
+};
+exports.freemem = function() {
+    return Number.MAX_VALUE;
+};
+exports.totalmem = function() {
+    return Number.MAX_VALUE;
+};
+exports.cpus = function() {
+    return [];
+};
+exports.type = function() {
+    return "Browser";
+};
+exports.release = function() {
+    if (typeof navigator !== "undefined") return navigator.appVersion;
+    return "";
+};
+exports.networkInterfaces = exports.getNetworkInterfaces = function() {
+    return {};
+};
+exports.arch = function() {
+    return "javascript";
+};
+exports.platform = function() {
+    return "browser";
+};
+exports.tmpdir = exports.tmpDir = function() {
+    return "/tmp";
+};
+exports.EOL = "\n";
+exports.homedir = function() {
+    return "/";
+};
+
+},{}],"9OQAM":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 class SearchView {
@@ -3252,17 +3502,30 @@ class cartView extends (0, _viewJsDefault.default) {
     _generateMarkup() {
         return this._data.map(this._generateMarkupPreview).join("");
     }
+    addHandlerRemove(handler) {
+        this._parentElement.addEventListener("click", function(e) {
+            const btn = e.target.closest(".btn__removeIng");
+            if (!btn) return;
+            const removeIng = String(btn.dataset.remove);
+            handler(removeIng);
+        });
+    }
     _generateMarkupPreview(data) {
         return `
     <li class="recipe__ingredient">
-    <svg class="recipe__icon">
-        <use href="src/img/icons.svg#icon-check"></use>
-    </svg>
-    <div class="recipe__quantity">${data.ingQuantity}</div>
-    <div class="recipe__description">            
-        ${data.ingDescription}
+    <div class="ingredinets__quantityAndDes">
+      <svg class="recipe__icon">
+        <use href="${0, _iconsSvgDefault.default}#bag"></use>
+      </svg>
+      <h2 class="recipe__quantity">${data.ingQuantity}</h2>
+      <h3 class="recipe__description">${data.ingDescription}</h3>
     </div>
-</li>
+    <button data-remove="${data.id}" class="btn--tiny btn__removeIng">
+      <svg>
+        <use href="${0, _iconsSvgDefault.default}#trash"></use>
+      </svg>
+    </button>
+  </li>   
     `;
     }
 }

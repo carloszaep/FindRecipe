@@ -31,6 +31,7 @@ const controlRecipe = async function () {
     // RENDER RECIPE
     recipeView.render(model.state.recipe);
     bookmarksView.render(model.state.bookmarks);
+    addToCart.render(model.state.cart);
   } catch (err) {
     recipeView.renderError(err.message);
     console.error(err.message);
@@ -85,6 +86,7 @@ const controlAddRecipe = async function (newRecipe) {
 
     // render bookmark view
     bookmarksView.render(model.state.bookmarks);
+    addToCart.render(model.state.cart);
 
     // change id in url
     window.history.pushState(null, '', `#${model.state.recipe.id}`);
@@ -95,7 +97,15 @@ const controlAddRecipe = async function (newRecipe) {
 
 const controlAddToCart = function (ingredient) {
   model.addToCart(ingredient);
-  addToCart.render(ingredient);
+
+  addToCart.render(model.state.cart);
+};
+
+const controlRemoveFromCart = function (id) {
+  // remove from model
+  model.removeToCart(id);
+  // render display
+  addToCart.render(model.state.cart);
 };
 
 const init = function () {
@@ -105,7 +115,9 @@ const init = function () {
   recipeView.addHandlerAddBookmark(controlAddOrDelBookmark);
   searchView.addHandlerSearch(controlSearchResult);
   paginationView.addHandlerLClick(controlPagination);
+
   addRecipeView.addHandlerUpload(controlAddRecipe);
+  addToCart.addHandlerRemove(controlRemoveFromCart);
 };
 
 init();

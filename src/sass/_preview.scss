@@ -103,3 +103,15 @@
     }
   }
 }
+
+.recipe__ingredient {
+  display: flex;
+  padding: 5%;
+  justify-content: space-around;
+  border-top: 1px solid $color-primary;
+}
+
+.ingredinets__quantityAndDes {
+  display: flex;
+  flex-direction: row;
+}

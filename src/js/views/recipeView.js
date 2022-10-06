@@ -1,7 +1,7 @@
 import View from './view.js';
 import icons from 'url:../../img/icons.svg';
 import { Fraction } from 'fractional';
-
+import uniqid from 'uniqid';
 class RecipeView extends View {
   _parentElement = document.querySelector('.recipe');
   _message = '';
@@ -24,17 +24,15 @@ class RecipeView extends View {
     this._parentElement.addEventListener('click', function (e) {
       const ingredient = e.target.closest('.recipe__ingredient');
       if (!ingredient) return;
-      console.log(ingredient);
+      const id = uniqid();
 
-      const unit = ingredient.querySelector('.recipe__unit').textContent;
-      console.log(unit);
       const ingQuantity =
         ingredient.querySelector('.recipe__quantity').textContent;
       const ingDescription = ingredient
         .querySelector('.recipe__description')
         .textContent.trim();
 
-      handler({ ingQuantity, ingDescription, unit });
+      handler({ ingQuantity, ingDescription, id });
     });
   }
 

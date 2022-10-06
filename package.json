@@ -18,11 +18,14 @@
   "homepage": "https://github.com/carloszaep/FindRecipe#readme",
   "devDependencies": {
     "@parcel/transformer-sass": "^2.7.0",
-    "parcel": "^2.7.0"
+    "os-browserify": "^0.3.0",
+    "parcel": "^2.7.0",
+    "process": "^0.11.10"
   },
   "dependencies": {
     "core-js": "^3.25.3",
     "fractional": "^1.0.0",
-    "regenerator-runtime": "^0.13.9"
+    "regenerator-runtime": "^0.13.9",
+    "uniqid": "^5.4.0"
   }
 }

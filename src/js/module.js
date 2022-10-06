@@ -38,10 +38,10 @@ export const addToCart = function (ingredient) {
   persistCart();
 };
 
-export const removeToCart = function () {
-  // remove bookmark
-
-  state.cart = [];
+export const removeToCart = function (id) {
+  // remove from cart
+  const index = state.cart.findIndex(el => el.id === id);
+  state.cart.splice(index, 1);
 
   persistCart();
 };
@@ -111,7 +111,7 @@ export const addBookmark = function (recipe) {
 
 export const removeBookmark = function (id) {
   // remove bookmark
-  const index = state.bookmarks.findIndex(el => (el.id = id));
+  const index = state.bookmarks.findIndex(el => el.id === id);
   state.bookmarks.splice(index, 1);
 
   // mark current recipe as NOT bookmark

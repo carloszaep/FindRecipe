@@ -485,6 +485,18 @@ body {
   fill: #f38e82;
 }
 
+.recipe__ingredient {
+  border-top: 1px solid #f38e82;
+  justify-content: space-around;
+  padding: 5%;
+  display: flex;
+}
+
+.ingredinets__quantityAndDes {
+  flex-direction: row;
+  display: flex;
+}
+
 .search-results {
   flex-direction: column;
   padding: 3rem 0;

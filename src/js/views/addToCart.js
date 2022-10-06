@@ -9,17 +9,33 @@ class cartView extends View {
     return this._data.map(this._generateMarkupPreview).join('');
   }
 
+  addHandlerRemove(handler) {
+    this._parentElement.addEventListener('click', function (e) {
+      const btn = e.target.closest('.btn__removeIng');
+
+      if (!btn) return;
+      const removeIng = String(btn.dataset.remove);
+
+      handler(removeIng);
+    });
+  }
+
   _generateMarkupPreview(data) {
     return `
     <li class="recipe__ingredient">
-    <svg class="recipe__icon">
-        <use href="src/img/icons.svg#icon-check"></use>
-    </svg>
-    <div class="recipe__quantity">${data.ingQuantity}</div>
-    <div class="recipe__description">            
-        ${data.ingDescription}
+    <div class="ingredinets__quantityAndDes">
+      <svg class="recipe__icon">
+        <use href="${icons}#bag"></use>
+      </svg>
+      <h2 class="recipe__quantity">${data.ingQuantity}</h2>
+      <h3 class="recipe__description">${data.ingDescription}</h3>
     </div>
-</li>
+    <button data-remove="${data.id}" class="btn--tiny btn__removeIng">
+      <svg>
+        <use href="${icons}#trash"></use>
+      </svg>
+    </button>
+  </li>   
     `;
   }
 }
