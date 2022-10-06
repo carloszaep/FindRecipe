@@ -1,6 +1,6 @@
 import View from './view.js';
 import icons from 'url:../../img/icons.svg';
-
+var n2f = require('num2fraction');
 import uniqid from 'uniqid';
 class RecipeView extends View {
   _parentElement = document.querySelector('.recipe');
@@ -118,7 +118,7 @@ class RecipeView extends View {
             <use href="${icons}#icon-check"></use>
           </svg>
           <div class="recipe__quantity">${
-            ing.quantity ? new Fraction(ing.quantity) : ''
+            ing.quantity ? new n2f(ing.quantity) : ''
           }</div>
           <div class="recipe__description">
             <span class="recipe__unit">${ing.unit}</span>
