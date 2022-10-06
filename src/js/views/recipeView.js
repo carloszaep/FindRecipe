@@ -1,6 +1,7 @@
 import View from './view.js';
 import icons from 'url:../../img/icons.svg';
 import { Fraction } from 'fractional';
+
 import uniqid from 'uniqid';
 class RecipeView extends View {
   _parentElement = document.querySelector('.recipe');
